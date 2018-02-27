@@ -22,7 +22,9 @@ Quelque soit le mode de jeu dans lequel l'utilisateur se trouve, ce dernier peut
 
 Coordonées des étudiants :
 - Stéphane ARCELLIER (@stepharc), stephane.arcellier@etu.univ-amu.fr, stephane.arcellier@hotmail.fr, 0491341012, 0695399502
-- Samuel GOLDSTEIN (-), -, -, -, -
+- Samuel GOLDSTEIN (@goldsamu)
 
 Encadrant :
 - Sébastien MAVROMATIS, sebastien.mavromatis@univ-amu.fr
+
+L'application développée nécessite l'installation d'une bibliothèque pour Unity3D, afin de garantir le support des Joycon (manettes Switch) : voici le lien pour la télécharger : https://github.com/Looking-Glass/JoyconLib/releases
