@@ -5,25 +5,18 @@ using UnityEngine;
 public class MG_Tampon : MonoBehaviour {
     private List<Joycon> joycons;
     private Joycon j;
-    public Vector3 gyro;
-    public int jc_ind = 0;
+    private Vector3 gyro;
+    private MG_Tampon_Surface sInstance;
+    private int jc_ind = 0;
 
-    IEnumerator jumpAnim(float o)
+    IEnumerator jumpAnim()
     {
-        Debug.Log(o);
         float waitTime = .4F;
         //Tampon se lève
         gameObject.transform.localPosition += new Vector3(0, 0.5f, 0);
         yield return new WaitForSeconds(waitTime);
         //On fait avancer le tampon
-        if (o >= 0)
-        {
-            gameObject.transform.localPosition += new Vector3(o, 0, 1f);
-        }
-        else
-        {
-            gameObject.transform.localPosition -= new Vector3(o, 0, 1f);
-        }
+        gameObject.transform.Translate(Vector3.forward);
         yield return new WaitForSeconds(waitTime);
         //On le repose
         gameObject.transform.localPosition -= new Vector3(0, 0.5f, 0);
@@ -37,6 +30,8 @@ public class MG_Tampon : MonoBehaviour {
         {
             j = joycons[jc_ind];
             gyro = j.GetGyro();
+            //Permet la communication entre le tampon et la surface de jeu.
+            sInstance = GetComponent<MG_Tampon_Surface>();
             gameObject.GetComponent<Renderer>().material.color = Color.red;
         }
         else
@@ -57,8 +52,7 @@ public class MG_Tampon : MonoBehaviour {
             Debug.Log("JUMP !");
             //Pour que l'animation de mouvement ne se fasse pas instantanément, on utilise
             //une fonction de co-routine jumpAnim et on l'appelle avec StartCoroutine.
-            orientation = gameObject.transform.localRotation.y;
-            StartCoroutine(jumpAnim(orientation));
+            StartCoroutine(jumpAnim());
         }
     }
 }
