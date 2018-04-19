@@ -37,10 +37,6 @@ public class Sphere_MGSphere : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        /*if(yinit == -1){
-                Debug.Log("En attente de détection des joycons ...");
-                Start();
-        }else{*/
         gyro = j.GetGyro();
         if ((!initpump) && gyro.y >= yinit + 5)
         {
@@ -71,6 +67,5 @@ public class Sphere_MGSphere : MonoBehaviour
                 Application.Quit();
             }
         }
-        //}
     }
 }
