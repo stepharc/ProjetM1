@@ -5,7 +5,6 @@ using UnityEngine;
 public class MG_Tampon : MonoBehaviour {
     private List<Joycon> joycons;
     private Joycon j;
-    private Vector3 gyro;
     private int jc_ind = 0;
     private MG_Tampon_Surface sInstance;
     private bool jumpMode;
@@ -46,7 +45,6 @@ public class MG_Tampon : MonoBehaviour {
         if (joycons.Count > 0)
         {
             j = joycons[jc_ind];
-            gyro = j.GetGyro();
             jumpMode = false;
             //Permet la communication entre le tampon et la surface de jeu.
             sInstance = GameObject.Find("Surface").GetComponent<MG_Tampon_Surface>();
