@@ -13,12 +13,13 @@ public class MG_Tampon : MonoBehaviour {
 
     IEnumerator jumpAnim()
     {
-        float waitTime = .4F, jumpHeight = 0.5f;
+        float waitTime = .3F, jumpHeight = 0.5f;
         //Tampon se lève
         gameObject.transform.localPosition += new Vector3(0, jumpHeight, 0);
         yield return new WaitForSeconds(waitTime);
         //On fait avancer le tampon
         gameObject.transform.Translate(Vector3.forward);
+        sInstance.correctTamponPosition(gameObject.transform.position, gameObject.transform);
         yield return new WaitForSeconds(waitTime);
         //On le repose
         gameObject.transform.localPosition -= new Vector3(0, jumpHeight, 0);

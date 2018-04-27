@@ -32,6 +32,51 @@ public class MG_Tampon_Surface : MonoBehaviour {
         tName = s;
     }
 
+    //Cette fonction vérifie si le tampon est toujours dans la surface de jeu. Si ce n'est pas le cas, le tampon est replacé de telle sorte que ce dernier soit de nouveau
+    //dans la zone jouable.
+    public void correctTamponPosition(Vector3 tPosition, Transform tTransform)
+    {
+        float distance;
+        //Le point de position du tampon se trouvant au centre de l'objet, il est nécessaire de prendre en compte la moitié des dimensions X et Z du tampon
+        //dans les calculs suivants, pour qu'une partie du tampon ne puisse pas sortir de la surface de jeu.
+        float additiveX = (float)tScaleX / 2;
+        float additiveZ = (float)tScaleZ / 2;
+        //Coordonnées world des limites de la surface de jeu.
+        Vector3 posMaxSurface = GetComponent<Renderer>().bounds.max;
+        Vector3 posMinSurface = GetComponent<Renderer>().bounds.min;
+        //Position du Tampon relative à la surface de jeu.
+        Vector3 sRelative = tPosition - gameObject.transform.position;
+        //Si le tampon dépasse la zone de jeu (Axe X)
+        if((sRelative.x > (posMaxSurface.x - additiveX)) || (sRelative.x < (posMinSurface.x + additiveX)))
+        {
+            if(sRelative.x > (posMaxSurface.x - additiveX))
+            {
+                //On replace le tampon de telle sorte que ce dernier soit de nouveau dans la surface de jeu.
+                distance = sRelative.x - (posMaxSurface.x - additiveX);
+                tTransform.localPosition -= new Vector3(distance, 0, 0);
+            }
+            else
+            {
+                distance = (posMinSurface.x + additiveX) - sRelative.x;
+                tTransform.localPosition += new Vector3(distance, 0, 0);
+            }
+        }
+        //Si le tampon dépasse la zone de jeu (Axe Z)
+        if ((sRelative.z > (posMaxSurface.z - additiveZ)) || (sRelative.z < (posMinSurface.z + additiveZ)))
+        {
+            if (sRelative.z > (posMaxSurface.z - additiveZ))
+            {
+                distance = sRelative.z - (posMaxSurface.z - additiveZ);
+                tTransform.localPosition -= new Vector3(0, 0, distance);
+            }
+            else
+            {
+                distance = (posMinSurface.z + additiveZ) - sRelative.z;
+                tTransform.localPosition += new Vector3(0, 0, distance);
+            }
+        }
+    }
+
     //Affiche la marque laissée par le tampon lors de son déplacement sur la surface de jeu.
     private void drawTrack(Collision collision)
     {
@@ -55,7 +100,7 @@ public class MG_Tampon_Surface : MonoBehaviour {
 
     // Use this for initialization
     void Start () {
-        
+
     }
 	
 	// Update is called once per frame
@@ -74,7 +119,7 @@ public class MG_Tampon_Surface : MonoBehaviour {
             for (int i = 0; i < collision.contacts.Length; i++)
             {
                 cp = collision.contacts[i];
-                Debug.Log("Point " + i + " : " + cp.point);
+                //Debug.Log("Point " + i + " : " + cp.point);
                 //Affiche le point de collision en noir sur la vue Editeur.
                 Debug.DrawRay(cp.point, cp.normal, Color.black, int.MaxValue, false);
             }
