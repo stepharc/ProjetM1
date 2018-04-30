@@ -7,7 +7,7 @@ public class BuildPyramide : MonoBehaviour
     {
         MeshFilter mf = GetComponent<MeshFilter>();
         Mesh mesh = mf.mesh;
-
+        Vector3 aleatoire = Random.insideUnitSphere;
         Vector3[] vertices = new Vector3[]
         {
             /* Base de la pyramide */
@@ -15,8 +15,9 @@ public class BuildPyramide : MonoBehaviour
             new Vector3(1,-1,1),
             new Vector3(-1,-1,-1),
             new Vector3(1,-1,-1),
-            /* Sommet de la pyramide avec une position choisie aléatoirement dans une sphère de rayon 1 */
-            Random.insideUnitSphere
+            /* Sommet de la pyramide avec une position choisie aléatoirement dans une sphère de rayon 1.
+             * + 0.1 pour la valeur y pour éviter les pyramide plates */
+            new Vector3(aleatoire.x, aleatoire.y + 0.1f, aleatoire.z)
         };
 
         int[] triangles = new int[]
