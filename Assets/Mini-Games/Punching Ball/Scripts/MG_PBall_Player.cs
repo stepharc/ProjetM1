@@ -9,7 +9,20 @@ public class MG_PBall_Player : MonoBehaviour {
     private MODE currentMode;
     private MG_PBall_PBall bInstance;
     private bool bug = false;
-    private MeshRenderer pRend;
+    //Angle de rotation (pour le mouvement circulaire)
+    private float timeCounter;
+    //Vitesse de rotation
+    private float speed;
+
+    public float getTimeCounter()
+    {
+        return timeCounter;
+    }
+
+    public string getCurrentMode()
+    {
+        return currentMode.ToString();
+    }
 
     //Place les joycons connectés dans la variable correspondante selon s'il s'agit du joycon droit ou du gauche.
     //Retourne vrai si les variables jg et jd ont été instanciées, faux sinon.
@@ -41,7 +54,6 @@ public class MG_PBall_Player : MonoBehaviour {
         {
             case MODE.ORIENTATION:
                 currentMode = MODE.POINTING;
-                pRend.enabled = true;
                 break;
             case MODE.POINTING:
                 break;
@@ -51,10 +63,18 @@ public class MG_PBall_Player : MonoBehaviour {
         return (oldMode != currentMode);
     }
 
-    //Déplace l'objet joueur sur la face du Punching Ball.
-    private void movePlayerObject()
+    //Déplace l'objet joueur sur la face du Punching Ball et effectue un mouvement circulaire sur celle-ci.
+    private void rotatePlayerObject()
     {
-        gameObject.transform.localPosition = new Vector3(bInstance.transform.position.x, 0, bInstance.transform.position.z);
+        //Rayon du cercle autour duquel le joueur va effectuer un mouvement circluaire : pour que l'objet soit en surface du punching ball,
+        //on doit compter la moitié de la dimension X du punching ball plus celle de l'utilisateur
+        float radius = (bInstance.transform.lossyScale.x / 2) + (gameObject.transform.lossyScale.x/2);
+        //On place d'abord l'objet au centre du cercle de rotation.
+        gameObject.transform.position = bInstance.GetComponent<Collider>().bounds.center;
+        //Puis on réalise le mouvement autour du cercle.
+        float newX = gameObject.transform.position.x + (Mathf.Cos(timeCounter) * radius);
+        float newZ = gameObject.transform.position.z + (Mathf.Sin(timeCounter) * radius);
+        gameObject.transform.position = new Vector3(newX, gameObject.transform.position.y, newZ);
     }
 
     //Cette fonction essaie de passer au mode précédent. Retourne vrai si l'action a réussi, faux sinon.
@@ -67,12 +87,27 @@ public class MG_PBall_Player : MonoBehaviour {
                 break;
             case MODE.POINTING:
                 currentMode = MODE.ORIENTATION;
-                pRend.enabled = false;
                 break;
             default:
                 break;
         }
         return (oldMode != currentMode);
+    }
+
+    //Réalise le mouvement adéquat sur l'objet joueur selon le mode dans lequel on est.
+    private void modeAction()
+    {
+        switch (currentMode)
+        {
+            //Tant qu'on est en mode orientation, le mouvement circulaire du joueur autour du Punching Ball continue.
+            case MODE.ORIENTATION:
+                rotatePlayerObject();
+                break;
+            case MODE.POINTING:
+                break;
+            default:
+                break;
+        }
     }
 
     // Use this for initialization
@@ -82,10 +117,9 @@ public class MG_PBall_Player : MonoBehaviour {
         {
             if (initJoycons())
             {
-                //On cache l'objet sans désactiver ses composants (et surtout ce script)
-                pRend = GetComponent<MeshRenderer>();
+                timeCounter = 0;
+                speed = 1;
                 currentMode = MODE.ORIENTATION;
-                pRend.enabled = false;
                 bInstance = GameObject.Find("Punching Ball").GetComponent<MG_PBall_PBall>();
                 bInstance.setPlayerMode(currentMode.ToString());
                 bInstance.setLeftJoycon(jg);
@@ -124,10 +158,12 @@ public class MG_PBall_Player : MonoBehaviour {
                     bInstance.setPlayerMode(currentMode.ToString());
                 }
             }
-            if(currentMode == MODE.POINTING)
+            //Tant qu'on est en mode orientation, on change l'angle de rotation.
+            if (currentMode == MODE.ORIENTATION)
             {
-                movePlayerObject();
+                timeCounter += Time.deltaTime * speed;
             }
+            modeAction();
         }
 	}
 }

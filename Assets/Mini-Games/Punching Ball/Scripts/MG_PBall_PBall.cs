@@ -24,13 +24,10 @@ public class MG_PBall_PBall : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
-        float orientation;
         switch (pMode)
         {
             //L'utilisateur choisit la face du Punching Ball à taper.
             case "ORIENTATION":
-                orientation = jg.GetGyro().z;
-                gameObject.transform.Rotate(new Vector3(0, orientation, 0));
                 break;
             //L'utilisateur sélectionne la zone du Punching Ball qu'il va taper (cf. script Player)
             case "POINTING":
