@@ -5,13 +5,16 @@ using System.Collections.Generic;
 
 public class ChangeMesh : MonoBehaviour
 {
-    private bool selected;
+    public bool selected;
+    private int current_vertex; // Le sommet observé par le curseur.
     Mesh mesh;
     Vector3[] verts;
     public List<GameObject> refVerts = new List<GameObject>();
 
     void Start()
     {
+        gameObject.tag = "Modifiable";
+        current_vertex = 0;
         mesh = GetComponent<MeshFilter>().mesh; // Permet de récupérer le maillage associé à l'objet.
         verts = mesh.vertices; // On récupère l'ensemble des sommets du maillage de base.
         selected = false;
@@ -69,16 +72,51 @@ public class ChangeMesh : MonoBehaviour
         g.transform.position = transform.TransformPoint(vert); //On convertit la position locale vers globale pour pouvoir placer le Vertex.
         g.transform.parent = transform; // Déclarer en tant qu'enfant de gameObject.
         g.GetComponent<Vertex>().Add(id); // On donne la référence du sommet au Vertex.
+        g.GetComponent<MeshRenderer>().enabled = false;
         refVerts.Add(g); // On ajoute le Vertex créé à refVerts pour retravailler dessus.
     }
 
     public void setSelected(bool s)
     {
         selected = s;
+        /* On affiche les sommets lorsque l'on passe en mode Modification */
+        foreach (GameObject v in refVerts)
+        {
+            v.GetComponent<MeshRenderer>().enabled = s;
+        }
     }
 
     public bool isSelected()
     {
         return selected;
+    }
+
+    public GameObject getCurrentVertex()
+    {
+        return refVerts[current_vertex];
+    }
+
+    /* Pour avancer le pointeur vers le sommet suivant */
+    public GameObject getNextVertex()
+    {
+        if (current_vertex + 1 >= refVerts.Count)
+        {
+            current_vertex = 0;
+        }
+        else
+            current_vertex++;
+        return refVerts[current_vertex];
+    }
+
+    /* Pour avancer le pointeur vers le sommet précédent */
+    public GameObject getPreviousVertex()
+    {
+        if (current_vertex == 0)
+        {
+            current_vertex = refVerts.Count-1;
+        }
+        else
+            current_vertex--;
+        return refVerts[current_vertex];
     }
 }
