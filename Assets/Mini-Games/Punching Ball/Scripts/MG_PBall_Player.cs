@@ -100,9 +100,45 @@ public class MG_PBall_Player : MonoBehaviour {
         gameObject.transform.position = new Vector3(newX, gameObject.transform.position.y, newZ);
     }
 
+    //Réalise une correction de l'axe Z et/ou X de la position du joueur pour que ce dernier soit toujours
+    //en collision avec le Punching-Ball.
+    private void correctPlayerPosition()
+    {
+        RaycastHit hit;
+        float radZ = (gameObject.transform.lossyScale.z / 2), radX = (gameObject.transform.lossyScale.x / 2);
+        Vector3 oldPos = gameObject.transform.position;
+        //On tente de trouver un point d'impact avec le Punching-Ball en essayant dans les quatre directions.
+        if (Physics.Raycast(oldPos, Vector3.back, out hit))
+        {
+            gameObject.transform.position = new Vector3(oldPos.x, oldPos.y, hit.point.z + radZ);
+        }
+        else
+        {
+            if (Physics.Raycast(oldPos, Vector3.forward, out hit))
+            {
+                gameObject.transform.position = new Vector3(oldPos.x, oldPos.y, hit.point.z - radZ);
+            }
+            else
+            {
+                if (Physics.Raycast(oldPos, Vector3.left, out hit))
+                {
+                    gameObject.transform.position = new Vector3(oldPos.x - radX, oldPos.y, oldPos.z);
+                }
+                else
+                {
+                    if (Physics.Raycast(oldPos, Vector3.right, out hit))
+                    {
+                        gameObject.transform.position = new Vector3(oldPos.x + radX, oldPos.y, oldPos.z);
+                    }
+                }
+            }
+        }
+    }
+
     //Effectue le déplacement du joueur sur son axe Y (limitée aux dimensions du Punching Ball) lors du mode POINTING selon la touche pressée.
     private void moveYAxisPlayer()
     {
+        RaycastHit hit;
         float moveSpeed = 0.075f, limit, oldY = gameObject.transform.position.y;
         //Bouton "Flèche Haut" enfoncé, on augmente la valeur Y de la position du joueur jusqu'à une certaine limite.
         if (jg.GetButton(Joycon.Button.DPAD_UP))
@@ -123,6 +159,7 @@ public class MG_PBall_Player : MonoBehaviour {
                 gameObject.transform.localPosition -= new Vector3(0, moveSpeed, 0);
             }
         }
+        correctPlayerPosition();
     }
 
     //Réalise le mouvement adéquat sur l'objet joueur selon le mode dans lequel on est.
@@ -159,6 +196,7 @@ public class MG_PBall_Player : MonoBehaviour {
                 bInstance.setPlayerMode(currentMode.ToString());
                 bInstance.setLeftJoycon(jg);
                 gameObject.GetComponent<Renderer>().material.color = Color.black;
+                gameObject.GetComponent<Rigidbody>().constraints = RigidbodyConstraints.FreezePosition | RigidbodyConstraints.FreezeRotation;
             }
             else
             {

@@ -6,6 +6,9 @@ public class MG_PBall_PBall : MonoBehaviour {
     private string pMode;
     private Joycon jg;
     private Vector3 lastContactPoint;
+    private Mesh deformingMesh;
+    private Vector3[] originalVertices, displacedVertices, vertexVelocities;
+    private float force, minForce, maxForce;
 
     public void setLeftJoycon(Joycon j)
     {
@@ -20,7 +23,23 @@ public class MG_PBall_PBall : MonoBehaviour {
     
 	// Use this for initialization
 	void Start () {
+        //Empêche tout mouvement non souhaité avec le joueur lors d'une collision entre les deux objets.
+        gameObject.GetComponent<Rigidbody>().constraints = RigidbodyConstraints.FreezePosition | RigidbodyConstraints.FreezeRotation;
         gameObject.GetComponent<Renderer>().material.color = Color.red;
+        lastContactPoint = new Vector3(0, 0, 0);
+        //Initialisation des données pour la force d'impact.
+        minForce = 5.0f;
+        force = minForce;
+        maxForce = 100f;
+        //Initialisation des données pour la déformation du Mesh.
+        deformingMesh = GetComponent<MeshFilter>().mesh;
+        originalVertices = deformingMesh.vertices;
+        displacedVertices = new Vector3[originalVertices.Length];
+        vertexVelocities = new Vector3[originalVertices.Length];
+        for (int i = 0; i < originalVertices.Length; i++)
+        {
+            displacedVertices[i] = originalVertices[i];
+        }
     }
 
     // Update is called once per frame
@@ -50,7 +69,8 @@ public class MG_PBall_PBall : MonoBehaviour {
         if (pMode.CompareTo("POINTING") == 0)
         {
             lastContactPoint = collisionInfo.contacts[0].point;
-            Debug.Log(lastContactPoint);
         }
     }
 }
+
+//http://catlikecoding.com/unity/tutorials/mesh-deformation/
