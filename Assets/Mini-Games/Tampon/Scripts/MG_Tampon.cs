@@ -2,7 +2,8 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class MG_Tampon : MonoBehaviour {
+public class MG_Tampon : MonoBehaviour
+{
     private List<Joycon> joycons;
     private Joycon j;
     private int jc_ind = 0;
@@ -64,21 +65,24 @@ public class MG_Tampon : MonoBehaviour {
     // Update is called once per frame
     void Update()
     {
-        //Modifie l'orientation du tampon (Axe Y) selon l'axe Z du gyroscope
-        float orientation = j.GetGyro().z;
-        if (!jumpMode)
+        if (joycons.Count > 0)
         {
-            gameObject.transform.Rotate(new Vector3(0, orientation, 0));
-        }
-        //Si le bouton "Flèche vers le haut" est pressé et que le tampon n'est pas en plein animation, on fait bouger le tampon.
-        if ((j.GetButtonDown(Joycon.Button.DPAD_UP)) && !jumpMode)
-        {
-            jumpMode = true;
-            Debug.Log("JUMP !");
-            sInstance.setTamponRotation(gameObject.transform.rotation.eulerAngles.y);
-            //Pour que l'animation de mouvement ne se fasse pas instantanément, on utilise
-            //une fonction de co-routine jumpAnim et on l'appelle avec StartCoroutine.
-            StartCoroutine(jumpAnim());
+            //Modifie l'orientation du tampon (Axe Y) selon l'axe Z du gyroscope
+            float orientation = j.GetGyro().z;
+            if (!jumpMode)
+            {
+                gameObject.transform.Rotate(new Vector3(0, orientation, 0));
+            }
+            //Si le bouton "Flèche vers le haut" est pressé et que le tampon n'est pas en plein animation, on fait bouger le tampon.
+            if ((j.GetButtonDown(Joycon.Button.DPAD_UP)) && !jumpMode)
+            {
+                jumpMode = true;
+                Debug.Log("JUMP !");
+                sInstance.setTamponRotation(gameObject.transform.rotation.eulerAngles.y);
+                //Pour que l'animation de mouvement ne se fasse pas instantanément, on utilise
+                //une fonction de co-routine jumpAnim et on l'appelle avec StartCoroutine.
+                StartCoroutine(jumpAnim());
+            }
         }
     }
 }

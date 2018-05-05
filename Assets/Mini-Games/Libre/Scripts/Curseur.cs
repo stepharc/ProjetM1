@@ -19,6 +19,7 @@ public class Curseur : MonoBehaviour
     private GameObject cam;
     public GameObject selection; // L'objet selectionné par le curseur.
     public GameObject sommet; // Le sommet observé en mode Modification.
+    public GameObject personnage; // Le personnage selectionné par le curseur.
 
     [Range(1, 3)]
     public int mode;
@@ -75,8 +76,10 @@ public class Curseur : MonoBehaviour
             {
                 controls[1] = 0;
             }
-
-            transform.position += new Vector3(controls[0], controls[1], controls[2]);
+            if (personnage != null)
+                transform.position = personnage.transform.position;
+            else
+                transform.position += new Vector3(controls[0], controls[1], controls[2]);
         }
     }
 
@@ -149,8 +152,10 @@ public class Curseur : MonoBehaviour
             {
                 controls[1] = 0;
             }
-
-            transform.position += new Vector3(controls[0], controls[1], controls[2]);
+            if (personnage != null)
+                transform.position = personnage.transform.position;
+            else
+                transform.position += new Vector3(controls[0], controls[1], controls[2]);
         }
     }
 
@@ -242,12 +247,35 @@ public class Curseur : MonoBehaviour
     {
         if (other.tag == "Selectionnable" || other.tag == "Modifiable")
         {
-            if (mode == (int)Modes.DEPLACEMENT)
+            if (mode == (int)Modes.DEPLACEMENT && personnage == null)
                 if (Input.GetButton("Fire2") || (j != null && j.GetButton(Joycon.Button.DPAD_DOWN)))
                 {
                     selection = other.gameObject;
                     selection.GetComponent<Rigidbody>().useGravity = false;
+                    if(selection.GetComponent<SpringJoint>() != null)
+                    {
+                        Destroy(selection.GetComponent<SpringJoint>());
+                    }
                 }
+        }
+        /* 
+         * Les personnages ne sont pas gérés de la même manière que les autres éléments. 
+         * Lorsqu'un personnage est sélectionné, on active ses animations et ses mouvements.
+         */
+        if (other.tag == "Character")
+        {
+            if (mode == (int)Modes.DEPLACEMENT)
+            {
+                if (Input.GetButton("Fire2") || (j != null && j.GetButton(Joycon.Button.DPAD_DOWN)))
+                {
+                    personnage = other.gameObject;
+                    other.gameObject.GetComponent<Animator>().enabled = true;
+                    foreach (MonoBehaviour script in other.GetComponents<MonoBehaviour>())
+                    {
+                        script.enabled = true;
+                    }
+                }
+            }
         }
     }
 
@@ -263,15 +291,40 @@ public class Curseur : MonoBehaviour
                 selection = null;
             }
         }
+        if (personnage != null)
+        {
+            if (mode == (int)Modes.DEPLACEMENT && (Input.GetButton("Fire3") || (j != null && j.GetButton(Joycon.Button.DPAD_UP))))
+            {
+                personnage.GetComponent<Animator>().enabled = false;
+                foreach (MonoBehaviour script in personnage.GetComponents<MonoBehaviour>())
+                {
+                    script.enabled = false;
+                }
+                personnage = null;
+            }
+        }
     }
 
     void OnTriggerEnter(Collider other)
     {
-        print(other);
-        if (other.tag == "Selectionnable" || other.tag == "Modifiable")
+        if (other.tag == "Selectionnable" || other.tag == "Modifiable" || other.tag == "Character")
         {
-            couleurBase = other.gameObject.GetComponent<Renderer>().material.color;
-            other.gameObject.GetComponent<Renderer>().material.color = Color.red;
+            Renderer renderer = null;
+            if (other.gameObject.GetComponent<Renderer>() != null)
+            {
+                renderer = other.gameObject.GetComponent<Renderer>();
+            }
+            else if (other.gameObject.GetComponentInChildren<Renderer>())
+            {
+                renderer = other.gameObject.GetComponentInChildren<Renderer>();
+            }
+
+            if (renderer != null)
+            {
+                couleurBase = renderer.material.color;
+                renderer.material.color = Color.red;
+            }
+
         }
     }
 
@@ -282,7 +335,22 @@ public class Curseur : MonoBehaviour
 
     void OnTriggerExit(Collider other)
     {
-        if (other.tag == "Selectionnable" || other.tag == "Modifiable")
-            other.gameObject.GetComponent<Renderer>().material.color = couleurBase;
+        if (other.tag == "Selectionnable" || other.tag == "Modifiable" || other.tag == "Character")
+        {
+            Renderer renderer = null;
+            if (other.gameObject.GetComponent<Renderer>() != null)
+            {
+                renderer = other.gameObject.GetComponent<Renderer>();
+            }
+            else if (other.gameObject.GetComponentInChildren<Renderer>())
+            {
+                renderer = other.gameObject.GetComponentInChildren<Renderer>();
+            }
+
+            if (renderer != null)
+            {
+                renderer.material.color = couleurBase;
+            }
+        }
     }
 }
