@@ -37,34 +37,37 @@ public class Sphere_MGSphere : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        gyro = j.GetGyro();
-        if ((!initpump) && gyro.y >= yinit + 5)
+        if (joycons.Count > 0)
         {
-            Debug.Log("Action de pompage initialisé.");
-            initpump = true;
-        }
-        if (initpump && gyro.y <= yinit - 5)
-        {
-            Debug.Log("De l'air est envoyé !");
-            //initpump = false;
-            gameObject.transform.localScale += new Vector3(0.1f, 0.1f, 0.1f);
-            SphereRadius = gameObject.transform.localScale.y;
-            radius = SphereRadius;
-        }
-        else if (SphereRadius > BaseRadius)
-        {
-            gameObject.transform.localScale -= new Vector3(0.01f, 0.01f, 0.01f);
-            SphereRadius = gameObject.transform.localScale.y;
-            radius = SphereRadius;
-        }
-        if (SphereRadius != -1)
-        {
-            if (SphereRadius >= 5)
+            gyro = j.GetGyro();
+            if ((!initpump) && gyro.y >= yinit + 5)
             {
-                Debug.Log("La sphère éclate !");
-                j.SetRumble(160f, 320f, 0.6f, 550);
-                Destroy(gameObject);
-                Application.Quit();
+                Debug.Log("Action de pompage initialisé.");
+                initpump = true;
+            }
+            if (initpump && gyro.y <= yinit - 5)
+            {
+                Debug.Log("De l'air est envoyé !");
+                //initpump = false;
+                gameObject.transform.localScale += new Vector3(0.1f, 0.1f, 0.1f);
+                SphereRadius = gameObject.transform.localScale.y;
+                radius = SphereRadius;
+            }
+            else if (SphereRadius > BaseRadius)
+            {
+                gameObject.transform.localScale -= new Vector3(0.01f, 0.01f, 0.01f);
+                SphereRadius = gameObject.transform.localScale.y;
+                radius = SphereRadius;
+            }
+            if (SphereRadius != -1)
+            {
+                if (SphereRadius >= 5)
+                {
+                    Debug.Log("La sphère éclate !");
+                    j.SetRumble(160f, 320f, 0.6f, 550);
+                    Destroy(gameObject);
+                    Application.Quit();
+                }
             }
         }
     }
