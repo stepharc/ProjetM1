@@ -7,6 +7,7 @@ public class MG_PBall_Camera : MonoBehaviour {
     private float offset;
     private MG_PBall_PBall bInstance;
     private MG_PBall_Player pInstance;
+    private MG_PBall_Text cInstance;
 
     //Copie le mouvement circulaire du joueur
     private void rotateCameraObject()
@@ -26,17 +27,29 @@ public class MG_PBall_Camera : MonoBehaviour {
         //On réalise la communication entre la caméra et le composant père, l'objet représentant le joueur.
         pInstance = gameObject.transform.parent.GetComponent<MG_PBall_Player>();
         bInstance = GameObject.Find("Punching Ball").GetComponent<MG_PBall_PBall>();
+        cInstance = gameObject.transform.GetChild(0).GetComponent<MG_PBall_Text>();
         offset = bInstance.transform.lossyScale.y * 3;
         rotateCameraObject();
     }
 	
 	// Update is called once per frame
 	void Update () {
-        string m = pInstance.getCurrentMode();
-        //Si on est toujours en mode orientation, on continue de faire tourner la caméra.
-        if (m == "ORIENTATION")
+        string cm = pInstance.getCurrentMode();
+        string f = pInstance.getImpactForce();
+        if(cm == "PUNCHING")
         {
-            rotateCameraObject();
+            cInstance.setForceTextVisibility(true);
         }
+        else
+        {
+            //Si on est toujours en mode orientation, on continue de faire tourner la caméra.
+            if (cm == "ORIENTATION")
+            {
+                rotateCameraObject();
+            }
+            cInstance.setForceTextVisibility(false);
+        }
+        cInstance.setModeText("MODE : " + cm);
+        cInstance.setForceText("FORCE : " + f);
     }
 }

@@ -8,10 +8,11 @@ public class MG_PBall_Player : MonoBehaviour {
     private enum MODE { ORIENTATION, POINTING, PUNCHING }
     private MODE currentMode;
     private MG_PBall_PBall bInstance;
-    private bool bug;
+    private bool bug, aPressed;
     private float timeCounter;
     //Vitesse de rotation (mouvement circulaire)
     private float speed;
+    private float force, minForce, maxForce, forceIncr;
 
     //Récupère l'angle de rotation (pour le mouvement circulaire)
     public float getTimeCounter()
@@ -22,6 +23,11 @@ public class MG_PBall_Player : MonoBehaviour {
     public string getCurrentMode()
     {
         return currentMode.ToString();
+    }
+
+    public string getImpactForce()
+    {
+        return force.ToString();
     }
 
     //Place les joycons connectés dans la variable correspondante selon s'il s'agit du joycon droit ou du gauche.
@@ -59,6 +65,12 @@ public class MG_PBall_Player : MonoBehaviour {
                 currentMode = MODE.PUNCHING;
                 break;
             case MODE.PUNCHING:
+                //La force a été choisie, on communique cette donnée au Punching Ball puis l'impact est réalisé.
+                aPressed = true;
+                bInstance.setForce(force);
+                bInstance.AddDeformingForce();
+                currentMode = MODE.POINTING;
+                aPressed = false;
                 break;
             default:
                 break;
@@ -79,6 +91,7 @@ public class MG_PBall_Player : MonoBehaviour {
                 break;
             case MODE.PUNCHING:
                 currentMode = MODE.POINTING;
+                aPressed = false;
                 break;
             default:
                 break;
@@ -138,7 +151,6 @@ public class MG_PBall_Player : MonoBehaviour {
     //Effectue le déplacement du joueur sur son axe Y (limitée aux dimensions du Punching Ball) lors du mode POINTING selon la touche pressée.
     private void moveYAxisPlayer()
     {
-        RaycastHit hit;
         float moveSpeed = 0.075f, limit, oldY = gameObject.transform.position.y;
         //Bouton "Flèche Haut" enfoncé, on augmente la valeur Y de la position du joueur jusqu'à une certaine limite.
         if (jg.GetButton(Joycon.Button.DPAD_UP))
@@ -162,6 +174,22 @@ public class MG_PBall_Player : MonoBehaviour {
         correctPlayerPosition();
     }
 
+    //Tant que le bouton A n'est pas une nouvelle fois préssé dans le mode PUNCHING, on incrémente la valeur force 
+    //entre les bornes minForce et maxForce.
+    private void selectImpactForce()
+    {
+        if (!aPressed)
+        {
+            //Si on atteint une borne, l'incrément devient son inverse pour que la force augmente ou diminue
+            //vers l'autre borne.
+            if (force == maxForce || force == minForce)
+            {
+                forceIncr = -forceIncr;
+            }
+            force += forceIncr;
+        }
+    }
+
     //Réalise le mouvement adéquat sur l'objet joueur selon le mode dans lequel on est.
     private void modeAction()
     {
@@ -175,6 +203,7 @@ public class MG_PBall_Player : MonoBehaviour {
                 moveYAxisPlayer();
                 break;
             case MODE.PUNCHING:
+                selectImpactForce();
                 break;
             default:
                 break;
@@ -189,12 +218,17 @@ public class MG_PBall_Player : MonoBehaviour {
         {
             if (initJoycons())
             {
+                aPressed = false;
                 timeCounter = 0;
                 speed = 1;
+                //Initialisation des données pour la force d'impact.
+                minForce = 500f;
+                force = minForce;
+                maxForce = 1000f;
+                forceIncr = -5;
                 currentMode = MODE.ORIENTATION;
                 bInstance = GameObject.Find("Punching Ball").GetComponent<MG_PBall_PBall>();
                 bInstance.setPlayerMode(currentMode.ToString());
-                bInstance.setLeftJoycon(jg);
                 gameObject.GetComponent<Renderer>().material.color = Color.black;
                 gameObject.GetComponent<Rigidbody>().constraints = RigidbodyConstraints.FreezePosition | RigidbodyConstraints.FreezeRotation;
             }
