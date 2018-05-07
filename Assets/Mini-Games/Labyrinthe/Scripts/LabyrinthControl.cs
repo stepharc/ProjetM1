@@ -79,7 +79,7 @@ public class LabyrinthControl : MonoBehaviour
         else if (mode == (int)ModeControles.ANALOGIQUE)
         {
             stick = j.GetStick();
-            gameObject.transform.rotation = Quaternion.Euler(-j.GetStick()[0] * vitesse, 180, -j.GetStick()[1] * vitesse);
+            gameObject.transform.rotation = Quaternion.Euler(-stick[0] * vitesse, 180, -stick[1] * vitesse);
         }
     }
 
