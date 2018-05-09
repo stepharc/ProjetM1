@@ -7,34 +7,40 @@ public class MG_Pin_Arms : MonoBehaviour {
     private Transform la, ra;
     private MG_Pin_Surface father;
     private bool mla, rla, mra, rra;
+    private float animSpeed;
+
+    public MG_Pin_Surface getFather()
+    {
+        return father;
+    }
 
     public void setLeftArm(Transform t)
     {
         la = t;
     }
 
-    //Effectue le mouvement du bras gauche vers le haut jusqu'à une valeur maximale.
+    //Effectue la rotation du bras gauche vers le haut jusqu'à une valeur maximale.
     IEnumerator moveLeftArm()
     {
         mla = true;
         float max = 110f, currentRotation = la.rotation.eulerAngles.y;
         while(currentRotation > max)
         {
-            la.Rotate(Vector3.down, 300f * Time.deltaTime);
+            la.Rotate(Vector3.down, animSpeed * Time.deltaTime);
             currentRotation = la.rotation.eulerAngles.y;
             yield return null;
         }
         mla = false;
     }
 
-    //Effectue le mouvement du bras gauche vers le bas jusqu'à sa position d'origine.
+    //Effectue la rotation du bras gauche vers le bas jusqu'à sa position d'origine.
     IEnumerator returnLeftArm()
     {
         rla = true;
         float min = la.GetComponent<MG_Pin_LRArm>().getBaseRotation(), currentRotation = la.rotation.eulerAngles.y;
         while (currentRotation < min)
         {
-            la.Rotate(Vector3.up, 300f * Time.deltaTime);
+            la.Rotate(Vector3.up, animSpeed * Time.deltaTime);
             currentRotation = la.rotation.eulerAngles.y;
             yield return null;
         }
@@ -52,7 +58,7 @@ public class MG_Pin_Arms : MonoBehaviour {
         float max = -110f, currentRotation = ra.rotation.eulerAngles.y - 360;
         while (currentRotation < max)
         {
-            ra.Rotate(Vector3.up, 300f * Time.deltaTime);
+            ra.Rotate(Vector3.up, animSpeed * Time.deltaTime);
             //eulerAngles ne gère pas les valeurs négatives. Or, nous sommes actuellement en train de manipuler
             //une telle valeur : il faut donc effectuer cette soustraction pour obtenir la valeur voulue.
             currentRotation = ra.rotation.eulerAngles.y - 360;
@@ -67,7 +73,7 @@ public class MG_Pin_Arms : MonoBehaviour {
         float min = ra.GetComponent<MG_Pin_LRArm>().getBaseRotation() - 360, currentRotation = ra.rotation.eulerAngles.y;
         while (currentRotation > min)
         {
-            ra.Rotate(Vector3.down, 300f * Time.deltaTime);
+            ra.Rotate(Vector3.down, animSpeed * Time.deltaTime);
             currentRotation = ra.rotation.eulerAngles.y - 360;
             yield return null;
         }
@@ -78,6 +84,7 @@ public class MG_Pin_Arms : MonoBehaviour {
     void Start () {
         father = gameObject.transform.parent.GetComponent<MG_Pin_Surface>();
         mla = rla = mra = rra = false;
+        animSpeed = 300f;
 	}
 	
 	// Update is called once per frame
@@ -106,7 +113,7 @@ public class MG_Pin_Arms : MonoBehaviour {
                     StartCoroutine("moveRightArm");
                 }
             }
-            //Bouton ZL relâché et bras gauche initialisé : on stoppe le mouvement du bras gauche vers
+            //Bouton ZL relâché et bras gauche initialisé : on stoppe la rotation du bras gauche vers
             //le haut (même si c'est en cours) et on entame le retour du bras gauche vers sa position initiale.
             if ((jg.GetButtonUp(Joycon.Button.SHOULDER_2)) && (la != null))
             {
