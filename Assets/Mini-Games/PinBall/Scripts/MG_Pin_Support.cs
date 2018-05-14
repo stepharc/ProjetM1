@@ -80,6 +80,12 @@ public class MG_Pin_Support : MonoBehaviour {
                     StartCoroutine("unleashSupport");
                 }
             }
+            if(gameObject.transform.position.y > spawnPos.y)
+            {
+                //On replace le palet exactement à sa position initiale (pour éviter que la bille ne se trouve
+                //en dessous du palet lors de sa réapparition suite à une défaite)
+                gameObject.transform.position = spawnPos;
+            }
         }
         else
         {

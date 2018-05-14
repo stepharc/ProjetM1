@@ -24,6 +24,7 @@ public class MG_Pin_LRArm : MonoBehaviour {
     //La bille ne touche plus le bras, la bille est donc projetée !
     private void OnCollisionExit(Collision collision)
     {
+        bool ok = true;
         if (collision.gameObject.name.CompareTo("Bille") == 0)
         {
             Rigidbody r = collision.gameObject.GetComponent<Rigidbody>();
@@ -42,9 +43,21 @@ public class MG_Pin_LRArm : MonoBehaviour {
                 //Plus la bille est loin de l'extremité du bras, plus la puissance de projection diminue.
                 pushForce = pushForce / distance;
             }
-            Vector3 forceVec = lastVelocity * pushForce;
-            r.AddForce(forceVec, ForceMode.Acceleration);
-            if (pushForce != basePushForce) pushForce = basePushForce;
+            else
+            {
+                //Empêche la projection de la bille si cette dernière ne touche plus le bras non pas à cause du
+                //joueur mais à cause de la gravité.
+                if(distance < 0.05)
+                {
+                    ok = false;
+                }
+            }
+            if (ok)
+            {
+                Vector3 forceVec = lastVelocity * pushForce;
+                r.AddForce(forceVec, ForceMode.Acceleration);
+                if (pushForce != basePushForce) pushForce = basePushForce;
+            }
         }
     }
 
