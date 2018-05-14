@@ -46,7 +46,10 @@ namespace Characters
             {
                 if (joycons.Count > 0)
                 {
-                    m_Jump = j.GetButton(Joycon.Button.DPAD_RIGHT);
+                    if (j.isLeft)
+                        m_Jump = j.GetButton(Joycon.Button.DPAD_RIGHT);
+                    else
+                        m_Jump = j.GetButton(Joycon.Button.DPAD_LEFT);
                 }
                 else
                 {
@@ -62,19 +65,35 @@ namespace Characters
             float h;
             float v;
             bool crouch;
+            bool ramasser, lacher;
 
             // read inputs
             if (joycons.Count > 0)
             {
-                h = -j.GetStick()[1];
-                v = j.GetStick()[0];
-                crouch = j.GetButton(Joycon.Button.DPAD_LEFT);
+                if (j.isLeft)
+                {
+                    h = -j.GetStick()[1];
+                    v = j.GetStick()[0];
+                    crouch = j.GetButton(Joycon.Button.DPAD_LEFT);
+                    ramasser = j.GetButton(Joycon.Button.DPAD_DOWN);
+                    lacher = j.GetButton(Joycon.Button.DPAD_LEFT);
+                }
+                else
+                {
+                    h = j.GetStick()[1];
+                    v = -j.GetStick()[0];
+                    crouch = j.GetButton(Joycon.Button.DPAD_RIGHT);
+                    ramasser = j.GetButton(Joycon.Button.DPAD_UP);
+                    lacher = j.GetButton(Joycon.Button.DPAD_RIGHT);
+                }
             }
             else
             {
                 h = Input.GetAxis("Horizontal");
                 v = Input.GetAxis("Vertical");
-                crouch = Input.GetKey(KeyCode.C);
+                crouch = Input.GetButton("Fire1");
+                ramasser = Input.GetButton("Fire2");
+                lacher = Input.GetButton("Fire1");
             }
             // calculate move direction to pass to character
             if (m_Cam != null)
@@ -87,6 +106,14 @@ namespace Characters
             {
                 // we use world-relative directions in the case of no main camera
                 m_Move = v * Vector3.forward + h * Vector3.right;
+            }
+            if (ramasser)
+            {
+                GetComponent<Ramasser>().Prendre();
+            }
+            if (lacher)
+            {
+                GetComponent<Ramasser>().Lacher();
             }
 #if !MOBILE_INPUT
             // walk speed multiplier
