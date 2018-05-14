@@ -59,21 +59,43 @@ public class Vertex : MonoBehaviour
     {
         stick = j.GetStick();
 
-        controls[0] = -stick[1] * vitesse;
-        controls[2] = stick[0] * vitesse;
+        if (j.isLeft)
+        {
+            controls[0] = -stick[1] * vitesse;
+            controls[2] = stick[0] * vitesse;
 
-        /* Ces boutons pour monter ou descendre */
-        if (j.GetButton(Joycon.Button.DPAD_RIGHT) && transform.localPosition.y < limit)
-        {
-            controls[1] = vitesse;
-        }
-        else if (j.GetButton(Joycon.Button.DPAD_LEFT) && transform.localPosition.y > -limit)
-        {
-            controls[1] = -vitesse;
+            /* Ces boutons pour monter ou descendre */
+            if (j.GetButton(Joycon.Button.DPAD_RIGHT) && transform.localPosition.y < limit)
+            {
+                controls[1] = vitesse;
+            }
+            else if (j.GetButton(Joycon.Button.DPAD_LEFT) && transform.localPosition.y > -limit)
+            {
+                controls[1] = -vitesse;
+            }
+            else
+            {
+                controls[1] = 0;
+            }
         }
         else
         {
-            controls[1] = 0;
+            controls[0] = stick[1] * vitesse;
+            controls[2] = -stick[0] * vitesse;
+
+            /* Ces boutons pour monter ou descendre */
+            if (j.GetButton(Joycon.Button.DPAD_LEFT) && transform.localPosition.y < limit)
+            {
+                controls[1] = vitesse;
+            }
+            else if (j.GetButton(Joycon.Button.DPAD_RIGHT) && transform.localPosition.y > -limit)
+            {
+                controls[1] = -vitesse;
+            }
+            else
+            {
+                controls[1] = 0;
+            }
         }
 
         /* Le sommet bouge dans le domaine local, donc par rapport à son objet parent et non par rapport au monde. */

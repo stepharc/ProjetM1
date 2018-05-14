@@ -8,7 +8,7 @@ public class Teleporteur : MonoBehaviour
 
     void OnTriggerEnter(Collider other)
     {
-        if (other.gameObject.GetComponent<Rigidbody>() != null && other.gameObject.GetComponent<Rigidbody>().useGravity && other.tag != "Character")
+        if (other.gameObject.GetComponent<Rigidbody>() != null && (other.gameObject.GetComponent<Rigidbody>().useGravity || other.gameObject.GetComponent<GravityOrientation>() != null) && other.tag != "Character")
         {
             /* On tourne l'objet other dans le sens de sortie */
             other.transform.eulerAngles += -sortie.eulerAngles - transform.eulerAngles;
