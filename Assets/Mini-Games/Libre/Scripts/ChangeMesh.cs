@@ -2,10 +2,9 @@
 using System.Collections;
 using System.Collections.Generic;
 
-
 public class ChangeMesh : MonoBehaviour
 {
-    public bool selected;
+    private bool selected;
     private int current_vertex; // Le sommet observé par le curseur.
     Mesh mesh;
     Vector3[] verts;
@@ -67,8 +66,9 @@ public class ChangeMesh : MonoBehaviour
                 return;
             }
         }
+
         /* Si aucun Vertex ne correspond, on en crée un nouveau à partir d'une ressource. */
-        g = Instantiate((GameObject)UnityEditor.AssetDatabase.LoadAssetAtPath("Assets/Mini-Games/Libre/Vertex.prefab", typeof(GameObject)));
+        g = Instantiate(Resources.Load("Vertex", typeof(GameObject))) as GameObject;
         g.transform.position = transform.TransformPoint(vert); //On convertit la position locale vers globale pour pouvoir placer le Vertex.
         g.transform.parent = transform; // Déclarer en tant qu'enfant de gameObject.
         g.GetComponent<Vertex>().Add(id); // On donne la référence du sommet au Vertex.

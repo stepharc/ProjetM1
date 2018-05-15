@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Teleporteur : MonoBehaviour
+public class Piques : MonoBehaviour
 {
     public Transform sortie;
 
@@ -14,8 +14,10 @@ public class Teleporteur : MonoBehaviour
             other.transform.eulerAngles += -sortie.eulerAngles - transform.eulerAngles;
             /* On déplace l'objet */
             other.gameObject.transform.position = sortie.position;
-            /* On conserve la vitesse de l'objet et on la dirige dans le sens de sortie */
-            other.gameObject.GetComponent<Rigidbody>().velocity = other.gameObject.GetComponent<Rigidbody>().velocity.magnitude * -sortie.forward.normalized;
+            other.gameObject.transform.rotation = sortie.rotation;
+            /* On réinitialise la vitesse de l'objet */
+            other.gameObject.GetComponent<Rigidbody>().velocity = Vector3.zero;
+            other.gameObject.GetComponent<Rigidbody>().angularVelocity = Vector3.zero;
         }
     }
 }

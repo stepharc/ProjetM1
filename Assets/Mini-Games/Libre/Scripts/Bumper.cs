@@ -9,9 +9,9 @@ public class Bumper : MonoBehaviour
     /* Lorsqu'un objet rentre en contact avec le Bumper il est propulsé */
     void OnCollisionEnter(Collision other)
     {
-        if (other.gameObject.GetComponent<Rigidbody>() != null && other.gameObject.GetComponent<Rigidbody>().useGravity)
+        if (other.gameObject.GetComponent<Rigidbody>() != null && (other.gameObject.GetComponent<Rigidbody>().useGravity || other.gameObject.GetComponent<GravityOrientation>() != null))
         {
-            other.gameObject.GetComponent<Rigidbody>().AddForce(-transform.forward*force* other.gameObject.GetComponent<Rigidbody>().mass);
+            other.gameObject.GetComponent<Rigidbody>().AddForce(-transform.forward * force * other.gameObject.GetComponent<Rigidbody>().mass);
         }
     }
 }

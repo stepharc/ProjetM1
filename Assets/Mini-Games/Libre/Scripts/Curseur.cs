@@ -2,6 +2,8 @@
 using System.Collections;
 using System.Collections.Generic;
 
+using UnityEngine.UI;
+
 public class Curseur : MonoBehaviour
 {
     private enum Modes : int
@@ -60,21 +62,43 @@ public class Curseur : MonoBehaviour
         {
             stick = j.GetStick();
 
-            controls[0] = -stick[1] * vitesse;
-            controls[2] = stick[0] * vitesse;
+            if (j.isLeft)
+            {
+                controls[0] = -stick[1] * vitesse;
+                controls[2] = stick[0] * vitesse;
 
-            /* Ces boutons pour monter ou descendre */
-            if (j.GetButton(Joycon.Button.DPAD_RIGHT) && transform.position.y < limit)
-            {
-                controls[1] = vitesse;
-            }
-            else if (j.GetButton(Joycon.Button.DPAD_LEFT) && transform.position.y > -limit)
-            {
-                controls[1] = -vitesse;
+                /* Ces boutons pour monter ou descendre */
+                if (j.GetButton(Joycon.Button.DPAD_RIGHT) && transform.position.y < limit)
+                {
+                    controls[1] = vitesse;
+                }
+                else if (j.GetButton(Joycon.Button.DPAD_LEFT) && transform.position.y > -limit)
+                {
+                    controls[1] = -vitesse;
+                }
+                else
+                {
+                    controls[1] = 0;
+                }
             }
             else
             {
-                controls[1] = 0;
+                controls[0] = stick[1] * vitesse;
+                controls[2] = -stick[0] * vitesse;
+
+                /* Ces boutons pour monter ou descendre */
+                if (j.GetButton(Joycon.Button.DPAD_LEFT) && transform.position.y < limit)
+                {
+                    controls[1] = vitesse;
+                }
+                else if (j.GetButton(Joycon.Button.DPAD_RIGHT) && transform.position.y > -limit)
+                {
+                    controls[1] = -vitesse;
+                }
+                else
+                {
+                    controls[1] = 0;
+                }
             }
             if (personnage != null)
                 transform.position = personnage.transform.position;
@@ -99,14 +123,14 @@ public class Curseur : MonoBehaviour
                 }
 
                 /* Si le stick est incliné */
-                if (stick[1] < -0.5 && !stickPushed)
+                if ((j.isLeft && stick[1] < -0.5 && !stickPushed) || (!j.isLeft && stick[1] > 0.5 && !stickPushed))
                 {
                     sommet.GetComponent<MeshRenderer>().material.color = couleurSommet; // Le sommet précédent redevient de couleur normale.
                     sommet = selection.GetComponent<ChangeMesh>().getNextVertex(); // On récupère le sommet suivant.
                     sommet.GetComponent<MeshRenderer>().material.color = Color.yellow; // On change la couleur du sommet pour le mettre en évidence.
                     stickPushed = true;
                 }
-                else if (stick[1] > 0.5 && !stickPushed)
+                else if ((!j.isLeft && stick[1] < -0.5 && !stickPushed) || (j.isLeft && stick[1] > 0.5 && !stickPushed))
                 {
                     sommet.GetComponent<MeshRenderer>().material.color = couleurSommet;
                     sommet = selection.GetComponent<ChangeMesh>().getPreviousVertex(); // On récupère le sommet précédent.
@@ -114,7 +138,7 @@ public class Curseur : MonoBehaviour
                     stickPushed = true;
                 }
 
-                if (j.GetButtonDown(Joycon.Button.DPAD_DOWN)) // On valide le sommet voulu.
+                if ((j.isLeft && j.GetButtonDown(Joycon.Button.DPAD_DOWN)) || (!j.isLeft && j.GetButtonDown(Joycon.Button.DPAD_UP))) // On valide le sommet voulu.
                 {
                     sommet.GetComponent<Vertex>().setSelected(true);
                     sommet.GetComponent<MeshRenderer>().material.color = Color.white; // On change à nouveau la couleur.
@@ -122,7 +146,7 @@ public class Curseur : MonoBehaviour
             }
             else
             {
-                if (j.GetButtonDown(Joycon.Button.DPAD_UP)) // On déselectionne le sommet.
+                if ((!j.isLeft && j.GetButtonDown(Joycon.Button.DPAD_DOWN)) || (j.isLeft && j.GetButtonDown(Joycon.Button.DPAD_UP))) // On déselectionne le sommet.
                 {
                     sommet.GetComponent<Vertex>().setSelected(false);
                     sommet.GetComponent<MeshRenderer>().material.color = Color.yellow;
@@ -248,7 +272,7 @@ public class Curseur : MonoBehaviour
         if (other.tag == "Selectionnable" || other.tag == "Modifiable")
         {
             if (mode == (int)Modes.DEPLACEMENT && personnage == null)
-                if (Input.GetButton("Fire2") || (j != null && j.GetButton(Joycon.Button.DPAD_DOWN)))
+                if (Input.GetButton("Fire2") || (j != null && ((j.isLeft && j.GetButtonDown(Joycon.Button.DPAD_DOWN)) || (!j.isLeft && j.GetButtonDown(Joycon.Button.DPAD_UP)))))
                 {
                     selection = other.gameObject;
                     selection.GetComponent<Rigidbody>().useGravity = false;
@@ -266,7 +290,7 @@ public class Curseur : MonoBehaviour
         {
             if (mode == (int)Modes.DEPLACEMENT)
             {
-                if (Input.GetButton("Fire2") || (j != null && j.GetButton(Joycon.Button.DPAD_DOWN)))
+                if (Input.GetButton("Fire2") || (j != null && ((j.isLeft && j.GetButtonDown(Joycon.Button.DPAD_DOWN)) || (!j.isLeft && j.GetButtonDown(Joycon.Button.DPAD_UP)))))
                 {
                     personnage = other.gameObject;
                     other.gameObject.GetComponent<Animator>().enabled = true;
@@ -285,7 +309,7 @@ public class Curseur : MonoBehaviour
         {
             selection.transform.position = transform.position;
 
-            if (mode == (int)Modes.DEPLACEMENT && (Input.GetButton("Fire3") || (j != null && j.GetButton(Joycon.Button.DPAD_UP))))
+            if (mode == (int)Modes.DEPLACEMENT && (Input.GetButton("Fire3") || (j != null && ((!j.isLeft && j.GetButtonDown(Joycon.Button.DPAD_DOWN)) || (j.isLeft && j.GetButtonDown(Joycon.Button.DPAD_UP))))))
             {
                 selection.GetComponent<Rigidbody>().useGravity = true;
                 selection = null;
@@ -293,7 +317,7 @@ public class Curseur : MonoBehaviour
         }
         if (personnage != null)
         {
-            if (mode == (int)Modes.DEPLACEMENT && (Input.GetButton("Fire3") || (j != null && j.GetButton(Joycon.Button.DPAD_UP))))
+            if (mode == (int)Modes.DEPLACEMENT && (Input.GetButton("Fire3") || (j != null && ((!j.isLeft && j.GetButtonDown(Joycon.Button.DPAD_DOWN)) || (j.isLeft && j.GetButtonDown(Joycon.Button.DPAD_UP))))))
             {
                 personnage.GetComponent<Animator>().enabled = false;
                 foreach (MonoBehaviour script in personnage.GetComponents<MonoBehaviour>())

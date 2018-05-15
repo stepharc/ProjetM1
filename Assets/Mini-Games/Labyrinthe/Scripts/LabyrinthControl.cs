@@ -56,19 +56,37 @@ public class LabyrinthControl : MonoBehaviour
     private void mouvementJoycon()
     {
         // Pour changer de mode de controle.
-        if (j.GetButtonDown(Joycon.Button.DPAD_DOWN))
+        if (j.isLeft)
         {
-            mode = (int)ModeControles.DETECTION;
-        }
+            if (j.GetButtonDown(Joycon.Button.DPAD_DOWN))
+            {
+                mode = (int)ModeControles.DETECTION;
+            }
 
-        if (j.GetButtonDown(Joycon.Button.DPAD_UP))
+            if (j.GetButtonDown(Joycon.Button.DPAD_UP))
+            {
+                mode = (int)ModeControles.ANALOGIQUE;
+            }
+        }
+        else
         {
-            mode = (int)ModeControles.ANALOGIQUE;
+            if (j.GetButtonDown(Joycon.Button.DPAD_UP))
+            {
+                mode = (int)ModeControles.DETECTION;
+            }
+
+            if (j.GetButtonDown(Joycon.Button.DPAD_DOWN))
+            {
+                mode = (int)ModeControles.ANALOGIQUE;
+            }
         }
 
         if (mode == (int)ModeControles.DETECTION)
         {
-            accel = j.GetAccel();
+            if(j.isLeft)
+                accel = j.GetAccel();
+            else
+                accel = -j.GetAccel();
 
             //Arrondissement à la décimale inférieure (pour limiter les tremblements)
             float x = (float)((int)(accel.x * 100)) / 100;
@@ -79,7 +97,10 @@ public class LabyrinthControl : MonoBehaviour
         else if (mode == (int)ModeControles.ANALOGIQUE)
         {
             stick = j.GetStick();
-            gameObject.transform.rotation = Quaternion.Euler(-stick[0] * vitesse, 180, -stick[1] * vitesse);
+            if(j.isLeft)
+                gameObject.transform.rotation = Quaternion.Euler(-stick[0] * vitesse, 180, -stick[1] * vitesse);
+            else
+                gameObject.transform.rotation = Quaternion.Euler(stick[0] * vitesse, 180, stick[1] * vitesse);
         }
     }
 
