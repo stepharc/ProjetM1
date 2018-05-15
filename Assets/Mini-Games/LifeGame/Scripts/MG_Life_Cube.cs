@@ -5,7 +5,7 @@ using UnityEngine;
 public class MG_Life_Cube : MonoBehaviour {
     private List<Joycon> joycons;
     private Joycon jg, jd;
-    private bool bug, copy;
+    private bool bug, copy, changeMat;
     private string pathGPUI, pathNotGPUI;
 
     //Place les joycons connectés dans la variable correspondante selon s'il s'agit du joycon droit ou du gauche.
@@ -34,16 +34,23 @@ public class MG_Life_Cube : MonoBehaviour {
     IEnumerator createClone()
     {
         copy = true;
-        //Crée une copie de l'objet contrôlé ...
+        if (changeMat) changeMat = false;
+        //Crée une copie de l'objet contrôlé  ...
         GameObject g = GameObject.Instantiate(gameObject);
+        g.SetActive(false);
+        g.tag = "Copy";
+        g.name = "InitialCopy";
         //... sur laquelle on remplace ce script par celui réservé pour les clones ...
         Destroy(g.GetComponent<MG_Life_Cube>());
         g.AddComponent<MG_Life_Clone>();
+        g.GetComponent<MG_Life_Clone>().setGenLeft(10);
         //... et en supprimant tous les enfants de l'objet original.
         foreach (Transform child in g.transform)
         {
             Destroy(child.gameObject);
         }
+        //On réactive le clone pour qu'il puisse commencer à produire des copies.
+        g.SetActive(true);
         //Ajout d'un petit délai afin d'éviter le spam d'appui de touche de création de clone.
         yield return new WaitForSeconds(0.75f);
         copy = false;
@@ -69,11 +76,11 @@ public class MG_Life_Cube : MonoBehaviour {
         gameObject.GetComponent<Renderer>().material = mat;
     }
 
-    //Produit la translation à une vitesse speed de l'objet contrôlé par le joueur selon l'orientation des sticks
-    //des Joycons toutes (excepté l'axe X du stick gauche, inutile ici) passées en paramètre.
-    private void stickMovements(float leftY, float rightX, float rightY, float speed)
+    //Produit la translation à une vitesse speed OU l'orientation à une vitesse speed * 4
+    //de l'objet contrôlé par le joueur selon l'orientation des sticks des Joycons toutes passées en paramètre.
+    private void stickMovements(float leftX, float leftY, float rightX, float rightY, float speed)
     {
-        //Stick droit : Haut / Bas / Gauche / Droite
+        //Stick droit : Haut / Bas / Rotation Gauche / Rotation Droit
         if (rightY > 0)
         {
             gameObject.transform.Translate(Vector3.up * speed * Time.deltaTime);
@@ -85,18 +92,29 @@ public class MG_Life_Cube : MonoBehaviour {
                 gameObject.transform.Translate(Vector3.down * speed * Time.deltaTime);
             }
         }
-        if(rightX > 0)
+        if (rightX > 0)
+        {
+            gameObject.transform.Rotate(Vector3.up * (speed * 4) * Time.deltaTime);
+        }
+        else
+        {
+            if (rightX < 0)
+            {
+                gameObject.transform.Rotate(Vector3.down * (speed * 4) * Time.deltaTime);
+            }
+        }
+        //Stick gauche : Avant / Arrière / Gauche / Droite
+        if (leftX > 0)
         {
             gameObject.transform.Translate(Vector3.right * speed * Time.deltaTime);
         }
         else
         {
-            if(rightX < 0)
+            if(leftX < 0)
             {
                 gameObject.transform.Translate(Vector3.left * speed * Time.deltaTime);
             }
         }
-        //Stick gauche : Avant / Arrière
         if (leftY > 0)
         {
             gameObject.transform.Translate(Vector3.forward * speed * Time.deltaTime);
@@ -125,6 +143,7 @@ public class MG_Life_Cube : MonoBehaviour {
                 Material mat = Resources.Load(pathNotGPUI, typeof(Material)) as Material;
                 gameObject.GetComponent<Renderer>().material = mat;
                 copy = false;
+                changeMat = true;
             }
             else
             {
@@ -143,17 +162,27 @@ public class MG_Life_Cube : MonoBehaviour {
 	void Update () {
         if (!bug)
         {
-            float lsy = jg.GetStick()[1], rsx = jd.GetStick()[0], rsy = jd.GetStick()[1];
-            //Bouton X pressé.
-            if (jd.GetButtonDown(Joycon.Button.DPAD_UP))
+            float lsx = jg.GetStick()[0], lsy = jg.GetStick()[1], rsx = jd.GetStick()[0], rsy = jd.GetStick()[1];
+            stickMovements(lsx, lsy, rsx, rsy, 25f);
+            //Bouton X pressé et il est encore possible de changer de matériau.
+            if (jd.GetButtonDown(Joycon.Button.DPAD_UP) && (changeMat))
             {
                 switchMaterial();
             }
-            stickMovements(lsy, rsx, rsy, 25f);
             //Bouton A pressé et possibilité de créer un clone.
             if (jd.GetButtonDown(Joycon.Button.DPAD_RIGHT) && (!copy))
             {
                 StartCoroutine("createClone");
+            }
+            //Bouton B pressé. On supprime tout les clones générés et on peut de nouveau changer de matériau.
+            if (jd.GetButtonDown(Joycon.Button.DPAD_DOWN))
+            {
+                GameObject[] objects = GameObject.FindGameObjectsWithTag("Copy");
+                foreach(GameObject go in objects)
+                {
+                    Destroy(go);
+                }
+                if (!changeMat) changeMat = true;
             }
         }
 	}
