@@ -43,7 +43,9 @@ public class MG_Life_Cube : MonoBehaviour {
         //... sur laquelle on remplace ce script par celui réservé pour les clones ...
         Destroy(g.GetComponent<MG_Life_Cube>());
         g.AddComponent<MG_Life_Clone>();
-        g.GetComponent<MG_Life_Clone>().setGenLeft(10);
+        Transform canvas = gameObject.transform.GetChild(0).GetChild(0);
+        int nbgen = canvas.GetComponent<MG_Life_Canvas>().getNbGen();
+        g.GetComponent<MG_Life_Clone>().setGenLeft(nbgen);
         //... et en supprimant tous les enfants de l'objet original.
         foreach (Transform child in g.transform)
         {
@@ -173,6 +175,20 @@ public class MG_Life_Cube : MonoBehaviour {
             if (jd.GetButtonDown(Joycon.Button.DPAD_RIGHT) && (!copy))
             {
                 StartCoroutine("createClone");
+            }
+            //Bouton Flèche haute pressé et il est encore possible de changer de matériau.
+            if (jg.GetButtonDown(Joycon.Button.DPAD_UP) && (changeMat))
+            {
+                Transform canvas = gameObject.transform.GetChild(0).GetChild(0);
+                int nbgen = canvas.GetComponent<MG_Life_Canvas>().getNbGen();
+                canvas.GetComponent<MG_Life_Canvas>().setNbGen(nbgen + 1);
+            }
+            //Bouton Flèche bas pressé et possibilité de changer de matériau.
+            if (jg.GetButtonDown(Joycon.Button.DPAD_DOWN) && (changeMat))
+            {
+                Transform canvas = gameObject.transform.GetChild(0).GetChild(0);
+                int nbgen = canvas.GetComponent<MG_Life_Canvas>().getNbGen();
+                canvas.GetComponent<MG_Life_Canvas>().setNbGen(nbgen - 1);
             }
             //Bouton B pressé. On supprime tout les clones générés et on peut de nouveau changer de matériau.
             if (jd.GetButtonDown(Joycon.Button.DPAD_DOWN))
