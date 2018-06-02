@@ -21,7 +21,7 @@ Pour ce qui est du mode libre, l'utilisateur se trouve dans une pièce dans laqu
 Quelque soit le mode de jeu dans lequel l'utilisateur se trouve, ce dernier peut, à tout moment, revenir au menu principal.
 
 Coordonées des étudiants :
-- Stéphane ARCELLIER (@stepharc), stephane.arcellier@etu.univ-amu.fr, stephane.arcellier@hotmail.fr, 0491341012, 0695399502
+- Stéphane ARCELLIER (@stepharc), stephane.arcellier@etu.univ-amu.fr, stephane.arcellier@hotmail.fr
 - Samuel GOLDSTEIN (@goldsamu)
 
 Encadrant :
